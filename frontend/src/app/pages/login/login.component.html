@@ -1,0 +1,53 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+  <div class="max-w-4xl w-full grid md:grid-cols-2 bg-white shadow-md rounded-lg overflow-hidden">
+
+    <!-- 🖥️ Left Welcome Section -->
+    <div class="hidden md:flex flex-col items-center justify-center bg-blue-600 text-white p-10">
+      <h1 class="text-4xl font-bold mb-4 text-center">Rampire Inventory System</h1>
+      <p class="text-center text-lg opacity-90">Efficiently track, manage, and monitor your assets in one place.</p>
+    </div>
+
+    <!-- 🔐 Right Login Form -->
+    <div class="w-full p-8 md:p-12">
+      <h2 class="text-3xl font-bold text-blue-600 text-center mb-6">Login</h2>
+
+      <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+        <div class="mb-4">
+          <label class="block mb-1 text-gray-700">Username</label>
+          <input
+            type="text"
+            name="username"
+            [(ngModel)]="username"
+            required
+            class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter username"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label class="block mb-1 text-gray-700">Password</label>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            required
+            class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter password"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
+        >
+          Login
+        </button>
+      </form>
+
+      <p class="mt-4 text-center text-sm text-gray-600">
+        Don't have an account?
+        <a routerLink="/register" class="text-blue-600 hover:underline font-medium">Create one here</a>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="flex h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-md hidden md:flex flex-col">
+    <div class="p-6 border-b">
+      <h2 class="text-2xl font-bold text-blue-600">Inventory System</h2>
+      <p class="text-sm mt-2 text-gray-500">👤 {{ username }}</p>
+    </div>
+    <nav class="flex-1 mt-4">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
+        class="block px-6 py-3 text-gray-700 hover:bg-blue-50 transition"
+      >
+        🏠 Dashboard
+      </a>
+      <a
+        routerLink="/categories"
+        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
+        class="block px-6 py-3 text-gray-700 hover:bg-blue-50 transition"
+      >
+        📂 Categories
+      </a>
+      <a
+        routerLink="/items"
+        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
+        class="block px-6 py-3 text-gray-700 hover:bg-blue-50 transition"
+      >
+        📦 Items
+      </a>
+      <a
+        routerLink="/sales"
+        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
+        class="block px-6 py-3 text-gray-700 hover:bg-blue-50 transition"
+      >
+        💰 Sales
+      </a>
+    </nav>
+    <button
+      (click)="onLogout()"
+      class="text-left px-6 py-3 mt-auto text-red-500 hover:bg-red-50 transition"
+    >
+      🚪 Logout
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6 overflow-y-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-semibold text-gray-800 mb-1">Welcome, {{ username }}</h1>
+      <p class="text-gray-500">Manage your inventory and track data efficiently.</p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white shadow-sm rounded-lg p-5 border-l-4 border-blue-500">
+        <h3 class="text-sm font-medium text-gray-500">Total Categories</h3>
+        <p class="text-2xl font-semibold text-blue-600">12</p>
+      </div>
+      <div class="bg-white shadow-sm rounded-lg p-5 border-l-4 border-green-500">
+        <h3 class="text-sm font-medium text-gray-500">Total Items</h3>
+        <p class="text-2xl font-semibold text-green-600">{{ totalItems }}</p>
+      </div>
+      <div class="bg-white shadow-sm rounded-lg p-5 border-l-4 border-yellow-500">
+        <h3 class="text-sm font-medium text-gray-500">Sales Today</h3>
+        <p class="text-2xl font-semibold text-yellow-600">₱ 5,430</p>
+      </div>
+    </div>
+
+    <!-- Instructional or Summary Text -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-xl font-semibold text-gray-700 mb-2">Quick Tips</h2>
+      <ul class="list-disc pl-5 text-gray-600 space-y-1">
+        <li>Use the sidebar to navigate between categories, items, and sales.</li>
+        <li>Click on any category to view or edit related items.</li>
+        <li>Visit the "Sales" section to record or track transactions.</li>
+      </ul>
+    </div>
+  </main>
+</div>

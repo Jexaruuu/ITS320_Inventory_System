@@ -1,0 +1,54 @@
+<div class="p-6 max-w-5xl mx-auto">
+  <h2 class="text-2xl font-bold mb-6 text-green-600">Sales Page</h2>
+
+  <!-- 🔙 Back Button -->
+  <button
+    (click)="goBack()"
+    class="mb-4 inline-flex items-center text-green-600 hover:text-green-800 font-medium"
+  >
+    ← Back
+  </button>
+
+  <table class="w-full bg-white shadow rounded overflow-x-auto">
+    <thead class="bg-green-100 text-green-800">
+      <tr>
+        <th class="text-left p-3">Image</th>
+        <th class="text-left p-3">Item</th>
+        <th class="text-left p-3">Category</th>
+        <th class="text-left p-3">Quantity</th>
+        <th class="text-left p-3">Price</th>
+        <th class="text-right p-3">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items" class="border-b">
+        <td class="p-3">
+          <img
+            *ngIf="item.image"
+            [src]="'http://localhost:5000' + item.image"
+            alt="Item Image"
+            class="w-16 h-16 object-cover rounded"
+          />
+        </td>
+        <td class="p-3">{{ item.name }}</td>
+        <td class="p-3">{{ item.categoryId?.name }}</td>
+        <td class="p-3">
+          <span *ngIf="item.quantity > 0; else soldOut">{{ item.quantity }}</span>
+          <ng-template #soldOut>
+            <span class="text-red-600 font-semibold">Sold Out</span>
+          </ng-template>
+        </td>
+        <td class="p-3">{{ item.price | currency:'PHP':'symbol':'1.2-2' }}</td>
+        <td class="p-3 text-right">
+          <button
+            (click)="sellItem(item)"
+            [disabled]="item.quantity <= 0"
+            class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            Sell
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
