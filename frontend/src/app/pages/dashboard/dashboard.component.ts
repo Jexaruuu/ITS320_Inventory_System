@@ -14,17 +14,19 @@ export class DashboardComponent implements OnInit {
   totalCategories: number = 0; // 👈 Add this
 
   constructor(private router: Router) {}
+  totalSalesToday: number = 0;
 
-  ngOnInit() {
-    const loggedIn = localStorage.getItem('loggedIn');
-    if (!loggedIn) {
-      this.router.navigate(['/login']);
-    }
-
-    this.username = localStorage.getItem('username') || '';
-    this.fetchItemCount();
-    this.fetchCategoryCount(); // 👈 Call the new function
+ngOnInit() {
+  const loggedIn = localStorage.getItem('loggedIn');
+  if (!loggedIn) {
+    this.router.navigate(['/login']);
   }
+
+  this.username = localStorage.getItem('username') || '';
+  this.fetchItemCount();
+  this.fetchCategoryCount();
+  this.fetchTodaySales(); // ✅ MUST be called
+}
 
   async fetchItemCount() {
     try {
@@ -46,6 +48,22 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+ async fetchTodaySales() {
+  console.log("Fetching today's sales..."); // 🔍 Debug log
+
+  try {
+    const res = await fetch('http://localhost:5000/api/sales/today-total', {
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+    console.log("Sales response:", data); // 🔍 Debug response
+
+    this.totalSalesToday = data.total;
+  } catch (err) {
+    console.error("Failed to fetch today's sales", err);
+  }
+}
   async checkSession() {
     const res = await fetch('http://localhost:5000/api/auth/me', {
       credentials: 'include',
@@ -69,3 +87,4 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 }
+
