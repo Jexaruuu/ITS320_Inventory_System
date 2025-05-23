@@ -11,6 +11,7 @@ import { Router, RouterModule } from '@angular/router';
 export class DashboardComponent implements OnInit {
   username: string = '';
   totalItems: number = 0;
+  totalCategories: number = 0; // 👈 Add this
 
   constructor(private router: Router) {}
 
@@ -22,6 +23,7 @@ export class DashboardComponent implements OnInit {
 
     this.username = localStorage.getItem('username') || '';
     this.fetchItemCount();
+    this.fetchCategoryCount(); // 👈 Call the new function
   }
 
   async fetchItemCount() {
@@ -31,6 +33,16 @@ export class DashboardComponent implements OnInit {
       this.totalItems = data.count;
     } catch (err) {
       console.error('Failed to fetch item count:', err);
+    }
+  }
+
+  async fetchCategoryCount() {
+    try {
+      const response = await fetch('http://localhost:5000/api/categories/count');
+      const data = await response.json();
+      this.totalCategories = data.count;
+    } catch (err) {
+      console.error('Failed to fetch category count:', err);
     }
   }
 

@@ -20,3 +20,12 @@ exports.delete = async (req, res) => {
   await Category.findByIdAndDelete(req.params.id);
   res.sendStatus(204);
 };
+
+exports.count = async (req, res) => {
+  try {
+    const count = await Category.countDocuments();
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to count categories' });
+  }
+};
