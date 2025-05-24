@@ -20,7 +20,6 @@ export class DashboardComponent implements OnInit {
   percentChangeAmount: number | null = null;
   percentChangeCount: number | null = null;
 
-  // ✅ Recently Sold Items and Category Chart Data
   recentSales: {
     itemName: string;
     categoryName: string;
@@ -28,10 +27,7 @@ export class DashboardComponent implements OnInit {
     date: string;
   }[] = [];
 
-  categoryChartData: {
-    labels: string[];
-    values: number[];
-  } = { labels: [], values: [] };
+  categoryDistribution: any[] = [];
 
   constructor(private router: Router, private salesService: SalesService) {}
 
@@ -52,6 +48,7 @@ export class DashboardComponent implements OnInit {
       if (made) {
         this.fetchTodaySales();
         this.fetchRecentSales();
+        this.fetchCategoryDistribution();
         this.salesService.resetNotification();
       }
     });
@@ -107,29 +104,37 @@ export class DashboardComponent implements OnInit {
 
   async fetchCategoryDistribution() {
     try {
-      const res = await fetch('http://localhost:5000/api/categories/distribution');
-      const data = await res.json();
-      this.categoryChartData = data;
-
-      setTimeout(() => this.renderCategoryChart(), 100);
-    } catch (err) {
-      console.error('Failed to fetch category distribution:', err);
+      const res = await fetch("http://localhost:5000/api/categories/distribution", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.categoryDistribution = data.map((entry: any) => ({
+          label: entry._id,
+          value: entry.totalSold,
+        }));
+        this.renderChart();
+      }
+    } catch (error) {
+      console.error("Error fetching category distribution:", error);
     }
   }
 
-  renderCategoryChart() {
+  renderChart() {
     const ctx = document.getElementById('categoryChart') as HTMLCanvasElement;
     if (!ctx) return;
 
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: this.categoryChartData.labels,
-        datasets: [{
-          label: 'Total Items',
-          data: this.categoryChartData.values,
-          backgroundColor: '#3B82F6',
-        }],
+        labels: this.categoryDistribution.map((entry) => entry.label),
+        datasets: [
+          {
+            label: 'Items Sold',
+            data: this.categoryDistribution.map((entry) => entry.value),
+            backgroundColor: '#3B82F6',
+          },
+        ],
       },
       options: {
         responsive: true,

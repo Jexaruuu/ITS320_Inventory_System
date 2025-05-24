@@ -1,4 +1,14 @@
 const Item = require("../models/itemModel");
+const Sale = require("../models/salesModel");
+
+exports.getRecentSales = async (req, res) => {
+  try {
+    const recentSales = await Sale.find().sort({ date: -1 }).limit(5);
+    res.json(recentSales);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch recent sales" });
+  }
+};
 
 exports.getTodaySales = async (req, res) => {
   try {
@@ -59,5 +69,26 @@ exports.getTodaySales = async (req, res) => {
   } catch (error) {
     console.error("Error fetching today's sales:", error);
     res.status(500).json({ message: "Failed to fetch sales" });
+  }
+};
+
+exports.getTodayTotalSales = async (req, res) => {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const sales = await Sale.find({ date: { $gte: startOfDay } });
+
+    const totalAmount = sales.reduce((sum, sale) => sum + sale.amount, 0);
+    const totalCount = sales.length;
+
+    res.json({
+      totalAmount,
+      totalCount,
+      percentAmountChange: 0, // You can implement this if you want
+      percentCountChange: 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch today's sales" });
   }
 };

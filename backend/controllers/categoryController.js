@@ -1,4 +1,5 @@
 const Category = require("../models/categoryModel");
+const Sale = require("../models/salesModel");
 
 exports.create = async (req, res) => {
   const category = new Category(req.body);
@@ -29,3 +30,22 @@ exports.count = async (req, res) => {
     res.status(500).json({ error: 'Failed to count categories' });
   }
 };
+
+// ✅ Category Distribution with Lookup (Recommended if using categoryId in sales)
+exports.getCategoryDistribution = async (req, res) => {
+  try {
+    const distribution = await Sale.aggregate([
+      {
+        $group: {
+          _id: "$categoryName",
+          totalSold: { $sum: 1 },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+    ]);
+    res.json(distribution); // ✅ Ensure this is an array
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch category distribution" });
+  }
+};
+
