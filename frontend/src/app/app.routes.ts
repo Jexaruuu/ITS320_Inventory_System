@@ -5,12 +5,12 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { CategoriesComponent } from './pages/categories/categories.component';
 import { ItemsComponent } from './pages/items/items.component';
 import { SalesComponent } from './pages/sales/sales.component';
-import { MainLayoutComponent } from './layouts/main-layout/main-layout.component'; // NEW
+import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  { path: 'register', component: RegisterComponent }, // ✅ This enables /register
   {
     path: '',
     component: MainLayoutComponent,

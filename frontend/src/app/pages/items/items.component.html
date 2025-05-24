@@ -115,17 +115,27 @@
       <td class="p-3 text-gray-700">
         {{ item.price | currency:'PHP':'symbol':'1.2-2' }}
       </td>
-      <td class="p-3 text-right space-x-2">
-        <button (click)="startEdit(item)" class="text-[#1877f2] hover:underline font-medium">Edit</button>
-        <button (click)="deleteItem(item._id)" class="text-red-600 hover:underline font-medium">Delete</button>
-      </td>
+     <td class="p-3 text-right space-x-2">
+  <button
+    (click)="startEdit(item)"
+    class="inline-flex items-center gap-1 bg-[#e7f3ff] text-[#1877f2] px-3 py-1.5 rounded-md shadow hover:bg-[#d0e7ff] transition"
+  >
+    ✏️ <span>Edit</span>
+  </button>
+  <button
+    (click)="deleteItem(item._id)"
+    class="inline-flex items-center gap-1 bg-red-100 text-red-600 px-3 py-1.5 rounded-md shadow hover:bg-red-200 transition"
+  >
+    🗑️ <span>Delete</span>
+  </button>
+</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 <!-- Edit Modal -->
-<div *ngIf="editingItem" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
+<div *ngIf="editingItem" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
   <div class="bg-white w-full max-w-lg p-6 rounded shadow-lg relative">
     <h2 class="text-xl font-bold text-[#1877f2] mb-4">Edit Item</h2>
 
