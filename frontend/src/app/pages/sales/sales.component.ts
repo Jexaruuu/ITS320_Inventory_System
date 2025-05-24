@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { SalesService } from '../../services/sales.service'; // ✅ fixed path
 
 @Component({
   selector: 'app-sales',
@@ -10,26 +11,33 @@ import { Router } from '@angular/router';
 })
 export class SalesComponent {
   items: any[] = [];
-  itemUrl = 'http://localhost:5000/api/items'; // ✅ API URL
+  itemUrl = 'http://localhost:5000/api/items';
 
   toast = {
     message: '',
-    type: 'success',
+    type: 'success' as 'success' | 'error' | 'warning',
     show: false,
   };
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private salesService: SalesService // ✅ DI works now
+  ) {}
 
   ngOnInit() {
     this.getItems();
   }
 
   async getItems() {
-    const res = await fetch(this.itemUrl, { credentials: 'include' });
-    if (res.ok) {
-      this.items = await res.json();
-    } else {
-      console.error('Failed to fetch items');
+    try {
+      const res = await fetch(this.itemUrl, { credentials: 'include' });
+      if (res.ok) {
+        this.items = await res.json();
+      } else {
+        console.error('Failed to fetch items');
+      }
+    } catch (err) {
+      console.error('Error fetching items:', err);
     }
   }
 
@@ -38,15 +46,21 @@ export class SalesComponent {
       return this.showToast('This item is out of stock.', 'warning');
     }
 
-    const res = await fetch(`${this.itemUrl}/sell/${item._id}`, {
-      method: 'PATCH',
-      credentials: 'include',
-    });
+    try {
+      const res = await fetch(`${this.itemUrl}/sell/${item._id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
 
-    if (res.ok) {
-      this.getItems();
-      this.showToast(`Sold 1x ${item.name}`, 'success');
-    } else {
+      if (res.ok) {
+        await this.getItems();
+        this.showToast(`Sold 1x ${item.name}`, 'success');
+        this.salesService.notifySaleMade(); // ✅ Notify dashboard
+      } else {
+        this.showToast('Failed to process sale.', 'error');
+      }
+    } catch (err) {
+      console.error('Error processing sale:', err);
       this.showToast('Failed to process sale.', 'error');
     }
   }
@@ -56,7 +70,6 @@ export class SalesComponent {
     setTimeout(() => (this.toast.show = false), 3000);
   }
 
-  // ✅ Back button method
   goBack() {
     this.router.navigate(['/dashboard']);
   }

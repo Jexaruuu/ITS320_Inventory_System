@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { SalesService } from '../../services/sales.service';
+import Chart from 'chart.js/auto'; // ✅ Chart.js must be installed
 
 @Component({
   selector: 'app-dashboard',
@@ -11,22 +13,49 @@ import { Router, RouterModule } from '@angular/router';
 export class DashboardComponent implements OnInit {
   username: string = '';
   totalItems: number = 0;
-  totalCategories: number = 0; // 👈 Add this
+  totalCategories: number = 0;
 
-  constructor(private router: Router) {}
   totalSalesToday: number = 0;
+  totalSalesCount: number = 0;
+  percentChangeAmount: number | null = null;
+  percentChangeCount: number | null = null;
 
-ngOnInit() {
-  const loggedIn = localStorage.getItem('loggedIn');
-  if (!loggedIn) {
-    this.router.navigate(['/login']);
+  // ✅ Recently Sold Items and Category Chart Data
+  recentSales: {
+    itemName: string;
+    categoryName: string;
+    amount: number;
+    date: string;
+  }[] = [];
+
+  categoryChartData: {
+    labels: string[];
+    values: number[];
+  } = { labels: [], values: [] };
+
+  constructor(private router: Router, private salesService: SalesService) {}
+
+  ngOnInit() {
+    const loggedIn = localStorage.getItem('loggedIn');
+    if (!loggedIn) {
+      this.router.navigate(['/login']);
+    }
+
+    this.username = localStorage.getItem('username') || '';
+    this.fetchItemCount();
+    this.fetchCategoryCount();
+    this.fetchTodaySales();
+    this.fetchRecentSales();
+    this.fetchCategoryDistribution();
+
+    this.salesService.saleMade$.subscribe((made) => {
+      if (made) {
+        this.fetchTodaySales();
+        this.fetchRecentSales();
+        this.salesService.resetNotification();
+      }
+    });
   }
-
-  this.username = localStorage.getItem('username') || '';
-  this.fetchItemCount();
-  this.fetchCategoryCount();
-  this.fetchTodaySales(); // ✅ MUST be called
-}
 
   async fetchItemCount() {
     try {
@@ -48,22 +77,70 @@ ngOnInit() {
     }
   }
 
- async fetchTodaySales() {
-  console.log("Fetching today's sales..."); // 🔍 Debug log
+  async fetchTodaySales() {
+    try {
+      const res = await fetch('http://localhost:5000/api/sales/today-total', {
+        credentials: 'include',
+      });
 
-  try {
-    const res = await fetch('http://localhost:5000/api/sales/today-total', {
-      credentials: 'include',
-    });
+      const data = await res.json();
 
-    const data = await res.json();
-    console.log("Sales response:", data); // 🔍 Debug response
-
-    this.totalSalesToday = data.total;
-  } catch (err) {
-    console.error("Failed to fetch today's sales", err);
+      this.totalSalesToday = data.totalAmount;
+      this.totalSalesCount = data.totalCount;
+      this.percentChangeAmount = data.percentAmountChange;
+      this.percentChangeCount = data.percentCountChange;
+    } catch (err) {
+      console.error("Failed to fetch today's sales", err);
+    }
   }
-}
+
+  async fetchRecentSales() {
+    try {
+      const res = await fetch('http://localhost:5000/api/sales/recent', {
+        credentials: 'include',
+      });
+      this.recentSales = await res.json();
+    } catch (err) {
+      console.error('Failed to fetch recent sales:', err);
+    }
+  }
+
+  async fetchCategoryDistribution() {
+    try {
+      const res = await fetch('http://localhost:5000/api/categories/distribution');
+      const data = await res.json();
+      this.categoryChartData = data;
+
+      setTimeout(() => this.renderCategoryChart(), 100);
+    } catch (err) {
+      console.error('Failed to fetch category distribution:', err);
+    }
+  }
+
+  renderCategoryChart() {
+    const ctx = document.getElementById('categoryChart') as HTMLCanvasElement;
+    if (!ctx) return;
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: this.categoryChartData.labels,
+        datasets: [{
+          label: 'Total Items',
+          data: this.categoryChartData.values,
+          backgroundColor: '#3B82F6',
+        }],
+      },
+      options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: {
+          legend: { display: false },
+        },
+      },
+    });
+  }
+
   async checkSession() {
     const res = await fetch('http://localhost:5000/api/auth/me', {
       credentials: 'include',
@@ -87,4 +164,3 @@ ngOnInit() {
     this.router.navigate(['/login']);
   }
 }
-

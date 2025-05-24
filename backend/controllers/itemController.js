@@ -39,13 +39,26 @@ exports.delete = async (req, res) => {
 };
 
 exports.sell = async (req, res) => {
-  const item = await Item.findById(req.params.id);
-  if (item.quantity > 0) {
+  try {
+    const item = await Item.findById(req.params.id);
+    if (!item || item.quantity <= 0) {
+      return res.status(400).json({ message: "Out of stock or item not found" });
+    }
+
+    // Decrease quantity
     item.quantity -= 1;
+
+    // ✅ Record the sale
+    item.sales.push({
+      amount: item.price,
+      date: new Date(), // Make sure this is recorded for dashboard aggregation
+    });
+
     await item.save();
     res.json(item);
-  } else {
-    res.status(400).json({ message: "Out of stock" });
+  } catch (error) {
+    console.error("Error processing sale:", error);
+    res.status(500).json({ message: "Failed to process sale" });
   }
 };
 
