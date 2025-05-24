@@ -2,9 +2,10 @@
 const mongoose = require('mongoose');
 
 const saleSchema = new mongoose.Schema({
-  itemName: { type: String, required: true },
-  categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-  amount: { type: Number, required: true },
+  itemName: String,
+  categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  categoryName: String, // 👈 Add this
+  amount: Number,
   date: { type: Date, default: Date.now }
 });
 

@@ -37,13 +37,13 @@ exports.getCategoryDistribution = async (req, res) => {
     const distribution = await Sale.aggregate([
       {
         $group: {
-          _id: "$categoryName",
+          _id: "$categoryName",  // works if categoryName exists
           totalSold: { $sum: 1 },
         },
       },
       { $sort: { totalSold: -1 } },
     ]);
-    res.json(distribution); // ✅ Ensure this is an array
+    res.json(distribution);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch category distribution" });
   }

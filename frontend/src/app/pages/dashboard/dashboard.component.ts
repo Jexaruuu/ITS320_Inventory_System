@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SalesService } from '../../services/sales.service';
-import Chart from 'chart.js/auto'; // ✅ Chart.js must be installed
+import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
   }[] = [];
 
   categoryDistribution: any[] = [];
+  chart: any; // ✅ store chart instance for cleanup
 
   constructor(private router: Router, private salesService: SalesService) {}
 
@@ -44,14 +45,14 @@ export class DashboardComponent implements OnInit {
     this.fetchRecentSales();
     this.fetchCategoryDistribution();
 
-    this.salesService.saleMade$.subscribe((made) => {
-      if (made) {
-        this.fetchTodaySales();
-        this.fetchRecentSales();
-        this.fetchCategoryDistribution();
-        this.salesService.resetNotification();
-      }
-    });
+this.salesService.saleMade$.subscribe((made) => {
+  if (made) {
+    this.fetchTodaySales();
+    this.fetchRecentSales();
+    this.fetchCategoryDistribution();
+    this.salesService.resetNotification();
+  }
+});
   }
 
   async fetchItemCount() {
@@ -79,7 +80,6 @@ export class DashboardComponent implements OnInit {
       const res = await fetch('http://localhost:5000/api/sales/today-total', {
         credentials: 'include',
       });
-
       const data = await res.json();
 
       this.totalSalesToday = data.totalAmount;
@@ -104,8 +104,8 @@ export class DashboardComponent implements OnInit {
 
   async fetchCategoryDistribution() {
     try {
-      const res = await fetch("http://localhost:5000/api/categories/distribution", {
-        credentials: "include",
+      const res = await fetch('http://localhost:5000/api/categories/distribution', {
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
@@ -124,7 +124,12 @@ export class DashboardComponent implements OnInit {
     const ctx = document.getElementById('categoryChart') as HTMLCanvasElement;
     if (!ctx) return;
 
-    new Chart(ctx, {
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    this.chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: this.categoryDistribution.map((entry) => entry.label),

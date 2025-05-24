@@ -1,4 +1,5 @@
 const Item = require("../models/itemModel");
+const Sale = require('../models/salesModel'); // Add this at the top
 
 exports.create = async (req, res) => {
   const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
@@ -69,5 +70,30 @@ exports.countItems = async (req, res) => {
   } catch (error) {
     console.error("Failed to count items:", error);
     res.status(500).json({ message: "Error counting items." });
+  }
+};
+
+exports.sellItem = async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id).populate('categoryId');
+    if (!item || item.quantity <= 0) return res.status(400).json({ message: 'Out of stock' });
+
+    item.quantity -= 1;
+    await item.save();
+
+    // 👇 Create sale record
+    const sale = new Sale({
+      itemName: item.name,
+      categoryId: item.categoryId._id,
+      categoryName: item.categoryId.name,
+      amount: item.price,
+      date: new Date()
+    });
+    await sale.save();
+
+    res.json({ success: true, message: 'Item sold and sale recorded', sale });
+  } catch (err) {
+    console.error("Error selling item:", err);
+    res.status(500).json({ error: 'Sale failed' });
   }
 };
