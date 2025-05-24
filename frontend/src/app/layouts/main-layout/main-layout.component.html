@@ -1,0 +1,35 @@
+<div class="flex h-screen bg-[#f0f2f5]">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-md flex flex-col">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-2xl font-bold text-[#1877f2]">Inventory System</h2>
+      <p class="text-sm mt-2 text-gray-600">👤 {{ username }}</p>
+    </div>
+    <nav class="flex-1 mt-4 space-y-1 px-4">
+      <a routerLink="/dashboard" routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
+         class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition">
+        🏠 Dashboard
+      </a>
+      <a routerLink="/categories" routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
+         class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition">
+        📁 Categories
+      </a>
+      <a routerLink="/items" routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
+         class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition">
+        📦 Items
+      </a>
+      <a routerLink="/sales" routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
+         class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition">
+        💰 Sales
+      </a>
+    </nav>
+    <button (click)="onLogout()" class="text-left px-6 py-3 mt-auto text-red-600 hover:bg-red-100 transition">
+      🚪 Logout
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-6 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main>
+</div>

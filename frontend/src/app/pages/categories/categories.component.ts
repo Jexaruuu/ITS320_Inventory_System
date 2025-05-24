@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-
 @Component({
   selector: 'app-categories',
   standalone: true,
@@ -15,14 +14,11 @@ export class CategoriesComponent {
   newCategory = '';
   editingId: string | null = null;
   editingName = '';
+  username = ''; // 👈 Define username
 
   baseUrl = 'http://localhost:5000/api/categories';
 
   constructor(private router: Router) {}
-
-goBack() {
-  this.router.navigate(['/dashboard']); // or any other route
-}
 
   ngOnInit() {
     const loggedIn = localStorage.getItem('loggedIn');
@@ -30,7 +26,17 @@ goBack() {
       this.router.navigate(['/login']);
     }
 
+    const storedUsername = localStorage.getItem('username'); // 👈 Load from localStorage
+    if (storedUsername) {
+      this.username = storedUsername;
+    }
+
     this.getCategories();
+  }
+
+  onLogout() {
+    localStorage.clear();
+    this.router.navigate(['/login']);
   }
 
   async getCategories() {

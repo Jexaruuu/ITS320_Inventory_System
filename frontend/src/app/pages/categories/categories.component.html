@@ -1,72 +1,69 @@
-<div class="p-6 max-w-3xl mx-auto"> 
-  <h2 class="text-2xl font-bold mb-6 text-blue-600">Manage Categories</h2>
-
-  <!-- 🔙 Back Button -->
-<button
-  (click)="goBack()"
-  class="mb-4 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
->
-  ← Back
-</button>
+<div class="p-6 max-w-7xl mx-auto">
+  <h2 class="text-3xl font-bold mb-8 text-[#1877f2]">Manage Categories</h2>
 
   <!-- Add Category Form -->
-  <form (ngSubmit)="addCategory()" class="flex gap-4 mb-6">
+  <form (ngSubmit)="addCategory()" class="flex flex-col md:flex-row gap-4 mb-8 items-start md:items-center">
     <input
       type="text"
       [(ngModel)]="newCategory"
       name="newCategory"
       required
-      class="flex-1 border p-2 rounded"
-      placeholder="Enter category name"
+      class="flex-1 border border-gray-300 p-3 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1877f2] w-full"
+      placeholder="Enter new category name..."
     />
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-      Add
+    <button
+      type="submit"
+      class="flex items-center gap-2 bg-[#1877f2] text-white px-5 py-3 rounded-md font-medium hover:bg-blue-700 transition"
+    >
+      ➕ Add Category
     </button>
   </form>
 
   <!-- Categories Table -->
-  <table class="w-full bg-white shadow rounded"> 
-    <thead class="bg-blue-100 text-blue-800">
-      <tr>
-        <th class="text-left p-3">Category Name</th>
-        <th class="text-right p-3">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let category of categories" class="border-b">
-        <td class="p-3">
-          <input
-            *ngIf="editingId === category._id"
-            [(ngModel)]="editingName"
-            name="editingName"
-            class="border p-1 w-full"
-            required
-          />
-          <span *ngIf="editingId !== category._id">{{ category.name }}</span>
-        </td>
-        <td class="p-3 text-right space-x-2">
-          <button
-            *ngIf="editingId !== category._id"
-            (click)="startEdit(category)"
-            class="text-blue-600 hover:underline"
-          >
-            Edit
-          </button>
-          <button
-            *ngIf="editingId === category._id"
-            (click)="saveEdit(category._id)"
-            class="text-green-600 hover:underline"
-          >
-            Save
-          </button>
-          <button
-            (click)="deleteCategory(category._id)"
-            class="text-red-600 hover:underline"
-          >
-            Delete
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="bg-[#e9ebee] text-[#1877f2] uppercase text-xs font-semibold tracking-wider">
+        <tr>
+          <th class="text-left px-6 py-3">Category Name</th>
+          <th class="text-right px-6 py-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+  <tr *ngFor="let category of categories" class="hover:bg-[#f0f2f5] text-[15px] transition">
+    <td class="px-6 py-4">
+      <input
+        *ngIf="editingId === category._id"
+        [(ngModel)]="editingName"
+        name="editingName"
+        class="border border-gray-300 p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-[#1877f2]"
+        required
+      />
+      <span *ngIf="editingId !== category._id" class="text-gray-800 font-medium">{{ category.name }}</span>
+    </td>
+    <td class="px-6 py-4 text-right space-x-2">
+      <button
+        *ngIf="editingId !== category._id"
+        (click)="startEdit(category)"
+        class="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium transition"
+      >
+        ✏️ Edit
+      </button>
+      <button
+        *ngIf="editingId === category._id"
+        (click)="saveEdit(category._id)"
+        class="inline-flex items-center text-green-600 hover:text-green-800 font-medium transition"
+      >
+        💾 Save
+      </button>
+      <button
+        (click)="deleteCategory(category._id)"
+        class="inline-flex items-center text-red-600 hover:text-red-800 font-medium transition"
+      >
+        🗑️ Delete
+      </button>
+    </td>
+  </tr>
+</tbody>
+    </table>
+  </div>
 </div>

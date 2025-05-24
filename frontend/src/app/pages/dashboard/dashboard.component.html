@@ -1,149 +1,76 @@
-<div class="flex h-screen bg-[#f0f2f5]">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white shadow-md flex flex-col">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-2xl font-bold text-[#1877f2]">Inventory System</h2>
-      <p class="text-sm mt-2 text-gray-600">👤 {{ username }}</p>
-    </div>
-    <nav class="flex-1 mt-4 space-y-1 px-4">
-  <a
-    routerLink="/dashboard"
-    routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
-    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#1877f2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7m-9 2v10" />
-    </svg>
-    Dashboard
-  </a>
-  <a
-    routerLink="/categories"
-    routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
-    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#1877f2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V7a2 2 0 00-2-2h-3.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293H6a2 2 0 00-2 2v6" />
-    </svg>
-    Categories
-  </a>
-  <a
-    routerLink="/items"
-    routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
-    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#1877f2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4" />
-    </svg>
-    Items
-  </a>
-  <a
-    routerLink="/sales"
-    routerLinkActive="bg-blue-50 text-[#1877f2] font-medium"
-    class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded transition"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#1877f2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-2m4-4h-6m0 0l2-2m-2 2l2 2" />
-    </svg>
-    Sales
-  </a>
-</nav>
-    <button
-      (click)="onLogout()"
-      class="text-left px-6 py-3 mt-auto text-red-600 hover:bg-red-100 transition"
-    >
-      🚪 Logout
-    </button>
-  </aside>
+<div class="p-6 max-w-7xl mx-auto">
+  <h2 class="text-3xl font-bold mb-6 text-[#1877f2]">Welcome, {{ username }}</h2>
+  <p class="text-gray-600 mb-6">Manage your inventory and track data efficiently.</p>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-6 overflow-y-auto">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-3xl font-semibold text-gray-800 mb-1">Welcome, {{ username }}</h1>
-        <p class="text-gray-600">Manage your inventory and track data efficiently.</p>
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white shadow rounded-lg p-5 border-t-4 border-[#1877f2]">
+      <h3 class="text-sm font-medium text-gray-500">Total Categories</h3>
+      <p class="text-2xl font-bold text-[#1877f2]">{{ totalCategories }}</p>
+    </div>
+    <div class="bg-white shadow rounded-lg p-5 border-t-4 border-[#42b72a]">
+      <h3 class="text-sm font-medium text-gray-500">Total Items</h3>
+      <p class="text-2xl font-bold text-[#42b72a]">{{ totalItems }}</p>
+    </div>
+    <div class="bg-white shadow rounded-lg p-5 border-t-4 border-[#f7b928]">
+      <h3 class="text-sm font-medium text-gray-500">Sales Today</h3>
+      <p class="text-2xl font-bold text-[#f7b928]">₱ {{ totalSalesToday.toFixed(2) }}</p>
+      <p class="text-sm text-gray-500">Transactions: {{ totalSalesCount }}</p>
+      <p *ngIf="percentChangeAmount !== null"
+         class="text-sm"
+         [class.text-green-600]="percentChangeAmount > 0"
+         [class.text-red-600]="percentChangeAmount < 0"
+         [class.text-gray-500]="percentChangeAmount === 0">
+        {{ percentChangeAmount > 0 ? '▲' : percentChangeAmount < 0 ? '▼' : '' }}
+        {{ percentChangeAmount.toFixed(2) }}% vs yesterday
+      </p>
+    </div>
+  </div>
+
+  <!-- Charts and Sales -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-700">Category Distribution</h2>
+        <span class="text-sm text-gray-400">Monthly</span>
+      </div>
+      <canvas id="categoryChart" class="w-full h-64"></canvas>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-700">Recently Sold Items</h2>
+        <button class="text-[#1877f2] text-sm">See All</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto text-sm">
+          <thead class="bg-[#e9ebee]">
+            <tr>
+              <th class="px-4 py-2 text-left">Item</th>
+              <th class="px-4 py-2 text-left">Category</th>
+              <th class="px-4 py-2 text-left">Amount</th>
+              <th class="px-4 py-2 text-left">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sale of recentSales" class="border-b hover:bg-[#f0f2f5]">
+              <td class="px-4 py-2">{{ sale.itemName }}</td>
+              <td class="px-4 py-2">{{ sale.categoryName }}</td>
+              <td class="px-4 py-2">₱{{ sale.amount.toFixed(2) }}</td>
+              <td class="px-4 py-2">{{ sale.date | date:'short' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 
-    <!-- Stats Section -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white shadow rounded-lg p-5 border-t-4 border-[#1877f2]">
-        <h3 class="text-sm font-medium text-gray-500">Total Categories</h3>
-        <p class="text-2xl font-bold text-[#1877f2]">{{ totalCategories }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-5 border-t-4 border-[#42b72a]">
-        <h3 class="text-sm font-medium text-gray-500">Total Items</h3>
-        <p class="text-2xl font-bold text-[#42b72a]">{{ totalItems }}</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-5 border-t-4 border-[#f7b928]">
-        <h3 class="text-sm font-medium text-gray-500">Sales Today</h3>
-        <p class="text-2xl font-bold text-[#f7b928]">
-          ₱ {{ totalSalesToday.toFixed(2) }}
-        </p>
-        <p class="text-sm text-gray-500">
-          Transactions: {{ totalSalesCount }}
-        </p>
-        <p
-          *ngIf="percentChangeAmount !== null"
-          class="text-sm"
-          [class.text-green-600]="percentChangeAmount > 0"
-          [class.text-red-600]="percentChangeAmount < 0"
-          [class.text-gray-500]="percentChangeAmount === 0"
-        >
-          {{ percentChangeAmount > 0 ? '▲' : percentChangeAmount < 0 ? '▼' : '' }}
-          {{ percentChangeAmount.toFixed(2) }}% vs yesterday
-        </p>
-      </div>
-    </div>
-
-    <!-- Category Chart and Recent Sales -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <!-- Category Redistribution -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-700">Category Distribution</h2>
-          <span class="text-sm text-gray-400">Monthly</span>
-        </div>
-        <canvas id="categoryChart" class="w-full h-64"></canvas>
-      </div>
-
-      <!-- Recently Sold Items -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-700">Recently Sold Items</h2>
-          <button class="text-[#1877f2] text-sm">See All</button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full table-auto text-sm">
-            <thead class="bg-[#e9ebee]">
-              <tr>
-                <th class="px-4 py-2 text-left">Item</th>
-                <th class="px-4 py-2 text-left">Category</th>
-                <th class="px-4 py-2 text-left">Amount</th>
-                <th class="px-4 py-2 text-left">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let sale of recentSales" class="border-b hover:bg-[#f0f2f5]">
-                <td class="px-4 py-2">{{ sale.itemName }}</td>
-                <td class="px-4 py-2">{{ sale.categoryName }}</td>
-                <td class="px-4 py-2">₱{{ sale.amount.toFixed(2) }}</td>
-                <td class="px-4 py-2">{{ sale.date | date:'short' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Instructional or Summary Text -->
-    <div class="bg-white p-6 rounded-lg shadow">
-      <h2 class="text-xl font-semibold text-gray-700 mb-2">Quick Tips</h2>
-      <ul class="list-disc pl-5 text-gray-600 space-y-1">
-        <li>Use the sidebar to navigate between categories, items, and sales.</li>
-        <li>Click on any category to view or edit related items.</li>
-        <li>Visit the "Sales" section to record or track transactions.</li>
-      </ul>
-    </div>
-  </main>
+  <!-- Tips -->
+  <div class="bg-white p-6 rounded-lg shadow">
+    <h2 class="text-xl font-semibold text-gray-700 mb-2">Quick Tips</h2>
+    <ul class="list-disc pl-5 text-gray-600 space-y-1">
+      <li>Use the sidebar to navigate between categories, items, and sales.</li>
+      <li>Click on any category to view or edit related items.</li>
+      <li>Visit the "Sales" section to record or track transactions.</li>
+    </ul>
+  </div>
 </div>
