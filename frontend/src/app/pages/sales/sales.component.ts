@@ -55,7 +55,9 @@ export class SalesComponent {
       if (res.ok) {
         await this.getItems();
         this.showToast(`Sold 1x ${item.name}`, 'success');
-        this.salesService.notifySaleMade(); // ✅ Notify dashboard
+
+        // ✅ Notify the dashboard to update totals
+        this.salesService.notifySaleMade(); 
       } else {
         this.showToast('Failed to process sale.', 'error');
       }

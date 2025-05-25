@@ -1,17 +1,6 @@
 <div class="p-6 max-w-7xl mx-auto">
   <h2 class="text-3xl font-bold mb-6 text-[#1877f2]">Manage Items</h2>
 
-  <!-- 🔙 Back Button -->
-  <button
-    (click)="goBack()"
-    class="mb-6 inline-flex items-center gap-2 text-white bg-[#1877f2] hover:bg-blue-700 px-4 py-2 rounded-md shadow transition"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-    </svg>
-    Back to Dashboard
-  </button>
-
   <!-- Add Item Form -->
   <form
     (ngSubmit)="addItem()"
@@ -89,49 +78,49 @@
   </form>
 
   <table class="w-full bg-white shadow rounded overflow-x-auto">
-  <thead class="bg-[#e9ebee] text-[#1877f2] uppercase text-xs font-semibold tracking-wider">
-    <tr>
-      <th class="text-left p-3">Image</th>
-      <th class="text-left p-3">Name</th>
-      <th class="text-left p-3">Category</th>
-      <th class="text-left p-3">Quantity</th>
-      <th class="text-left p-3">Price</th>
-      <th class="text-right p-3">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let item of items" class="hover:bg-[#f0f2f5] transition">
-      <td class="p-3">
-        <img
-          *ngIf="item.image"
-          [src]="'http://localhost:5000' + item.image"
-          alt="item"
-          class="w-16 h-16 object-cover rounded"
-        />
-      </td>
-      <td class="p-3 text-gray-800 font-medium">{{ item.name }}</td>
-      <td class="p-3 text-gray-600">{{ item.categoryId?.name }}</td>
-      <td class="p-3 text-gray-700">{{ item.quantity }}</td>
-      <td class="p-3 text-gray-700">
-        {{ item.price | currency:'PHP':'symbol':'1.2-2' }}
-      </td>
-     <td class="p-3 text-right space-x-2">
-  <button
-    (click)="startEdit(item)"
-    class="inline-flex items-center gap-1 bg-[#e7f3ff] text-[#1877f2] px-3 py-1.5 rounded-md shadow hover:bg-[#d0e7ff] transition"
-  >
-    ✏️ <span>Edit</span>
-  </button>
-  <button
-    (click)="deleteItem(item._id)"
-    class="inline-flex items-center gap-1 bg-red-100 text-red-600 px-3 py-1.5 rounded-md shadow hover:bg-red-200 transition"
-  >
-    🗑️ <span>Delete</span>
-  </button>
-</td>
-    </tr>
-  </tbody>
-</table>
+    <thead class="bg-[#e9ebee] text-[#1877f2] uppercase text-xs font-semibold tracking-wider">
+      <tr>
+        <th class="text-left p-3">Image</th>
+        <th class="text-left p-3">Name</th>
+        <th class="text-left p-3">Category</th>
+        <th class="text-left p-3">Quantity</th>
+        <th class="text-left p-3">Price</th>
+        <th class="text-right p-3">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of items" class="hover:bg-[#f0f2f5] transition">
+        <td class="p-3">
+          <img
+            *ngIf="item.image"
+            [src]="'http://localhost:5000' + item.image"
+            alt="item"
+            class="w-16 h-16 object-cover rounded"
+          />
+        </td>
+        <td class="p-3 text-gray-800 font-medium">{{ item.name }}</td>
+        <td class="p-3 text-gray-600">{{ item.categoryId?.name }}</td>
+        <td class="p-3 text-gray-700">{{ item.quantity }}</td>
+        <td class="p-3 text-gray-700">
+          {{ item.price | currency:'PHP':'symbol':'1.2-2' }}
+        </td>
+        <td class="p-3 text-right space-x-2">
+          <button
+            (click)="startEdit(item)"
+            class="inline-flex items-center gap-1 bg-[#e7f3ff] text-[#1877f2] px-3 py-1.5 rounded-md shadow hover:bg-[#d0e7ff] transition"
+          >
+            ✏️ <span>Edit</span>
+          </button>
+          <button
+            (click)="deleteItem(item._id)"
+            class="inline-flex items-center gap-1 bg-red-100 text-red-600 px-3 py-1.5 rounded-md shadow hover:bg-red-200 transition"
+          >
+            🗑️ <span>Delete</span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- Edit Modal -->

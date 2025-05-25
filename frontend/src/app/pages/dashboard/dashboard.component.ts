@@ -1,8 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { SalesService } from '../../services/sales.service';
-import Chart from 'chart.js/auto';
+
+// ✅ Import Chart.js components (includes Line chart)
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+// ✅ Register necessary components
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+);
 
 @Component({
   selector: 'app-dashboard',
@@ -10,7 +32,7 @@ import Chart from 'chart.js/auto';
   imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   username: string = '';
   totalItems: number = 0;
   totalCategories: number = 0;
@@ -27,10 +49,27 @@ export class DashboardComponent implements OnInit {
     date: string;
   }[] = [];
 
-  categoryDistribution: any[] = [];
-  chart: any; // ✅ store chart instance for cleanup
+  chart: Chart | null = null;
+  categorySalesOverTime: {
+    labels: string[];
+    datasets: {
+      label: string;
+      data: number[];
+      borderColor: string;
+      fill: boolean;
+      tension: number;
+      pointBackgroundColor: string;
+      pointRadius: number;
+    }[];
+  } = { labels: [], datasets: [] };
 
-  constructor(private router: Router, private salesService: SalesService) {}
+  constructor(private router: Router, private salesService: SalesService) {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd && event.urlAfterRedirects.includes('/dashboard')) {
+        this.refreshDashboard();
+      }
+    });
+  }
 
   ngOnInit() {
     const loggedIn = localStorage.getItem('loggedIn');
@@ -39,20 +78,29 @@ export class DashboardComponent implements OnInit {
     }
 
     this.username = localStorage.getItem('username') || '';
+    this.refreshDashboard();
+
+    this.salesService.saleMade$.subscribe((made) => {
+      if (made) {
+        this.refreshDashboard();
+        this.salesService.resetNotification();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
+  }
+
+  refreshDashboard() {
     this.fetchItemCount();
     this.fetchCategoryCount();
     this.fetchTodaySales();
     this.fetchRecentSales();
-    this.fetchCategoryDistribution();
-
-this.salesService.saleMade$.subscribe((made) => {
-  if (made) {
-    this.fetchTodaySales();
-    this.fetchRecentSales();
-    this.fetchCategoryDistribution();
-    this.salesService.resetNotification();
-  }
-});
+    this.fetchCategorySalesOverTime(); // ✅ updated
   }
 
   async fetchItemCount() {
@@ -81,7 +129,6 @@ this.salesService.saleMade$.subscribe((made) => {
         credentials: 'include',
       });
       const data = await res.json();
-
       this.totalSalesToday = data.totalAmount;
       this.totalSalesCount = data.totalCount;
       this.percentChangeAmount = data.percentAmountChange;
@@ -102,50 +149,85 @@ this.salesService.saleMade$.subscribe((made) => {
     }
   }
 
-  async fetchCategoryDistribution() {
-    try {
-      const res = await fetch('http://localhost:5000/api/categories/distribution', {
-        credentials: 'include',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        this.categoryDistribution = data.map((entry: any) => ({
-          label: entry._id,
-          value: entry.totalSold,
-        }));
-        this.renderChart();
+  // ✅ New fetch for category sales over time
+ async fetchCategorySalesOverTime() {
+  try {
+  const res = await fetch('http://localhost:5000/api/sales/categories/daily-sales', {
+  credentials: 'include',
+});
+    const rawData: {
+      categoryName: string;
+      date: string;
+      totalSold: number;
+    }[] = await res.json(); // 👈 explicitly type the response
+
+    const categoryMap: { [category: string]: { [date: string]: number } } = {};
+    rawData.forEach((entry) => {
+      if (!categoryMap[entry.categoryName]) {
+        categoryMap[entry.categoryName] = {};
       }
-    } catch (error) {
-      console.error("Error fetching category distribution:", error);
-    }
+      categoryMap[entry.categoryName][entry.date] = entry.totalSold;
+    });
+
+    const allDates = [...new Set(rawData.map((e) => e.date))].sort();
+
+    this.categorySalesOverTime = {
+      labels: allDates,
+      datasets: Object.entries(categoryMap).map(([category, dateMap]) => ({
+        label: category,
+        data: allDates.map((date) => dateMap[date] || 0),
+        borderColor: this.getColorForCategory(category),
+        fill: false,
+        tension: 0.3,
+        pointBackgroundColor: this.getColorForCategory(category),
+        pointRadius: 4,
+      })),
+    };
+
+    this.renderChart();
+  } catch (error) {
+    console.error('Error fetching category sales over time:', error);
+  }
+}
+
+  getColorForCategory(category: string): string {
+    const colors: { [key: string]: string } = {
+      Laptop: '#3B82F6',
+      Monitor: '#10B981',
+      Mouse: '#F59E0B',
+      Keyboard: '#EF4444',
+      Printer: '#6366F1',
+    };
+    return colors[category] || '#888888';
   }
 
   renderChart() {
-    const ctx = document.getElementById('categoryChart') as HTMLCanvasElement;
-    if (!ctx) return;
+    const canvas = document.getElementById('categoryChart') as HTMLCanvasElement;
+    if (!canvas) return;
 
+    const existingChart = Chart.getChart(canvas);
+    if (existingChart) existingChart.destroy();
 
-    if (this.chart) {
-      this.chart.destroy();
-    }
-
-    this.chart = new Chart(ctx, {
-      type: 'bar',
+    this.chart = new Chart(canvas, {
+      type: 'line',
       data: {
-        labels: this.categoryDistribution.map((entry) => entry.label),
-        datasets: [
-          {
-            label: 'Items Sold',
-            data: this.categoryDistribution.map((entry) => entry.value),
-            backgroundColor: '#3B82F6',
-          },
-        ],
+        labels: this.categorySalesOverTime.labels,
+        datasets: this.categorySalesOverTime.datasets,
       },
       options: {
         responsive: true,
-        indexAxis: 'y',
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Items Sold' },
+          },
+          x: {
+            title: { display: true, text: 'Date' },
+          },
+        },
         plugins: {
-          legend: { display: false },
+          legend: { display: true },
+          tooltip: { mode: 'index', intersect: false },
         },
       },
     });

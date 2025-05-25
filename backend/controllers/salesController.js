@@ -1,6 +1,7 @@
 const Item = require("../models/itemModel");
 const Sale = require("../models/salesModel");
 
+// ✅ Get 5 most recent sales
 exports.getRecentSales = async (req, res) => {
   try {
     const recentSales = await Sale.find().sort({ date: -1 }).limit(5);
@@ -10,6 +11,7 @@ exports.getRecentSales = async (req, res) => {
   }
 };
 
+// ✅ Get today sales and compare with yesterday
 exports.getTodaySales = async (req, res) => {
   try {
     const now = new Date();
@@ -18,7 +20,6 @@ exports.getTodaySales = async (req, res) => {
     const startOfYesterday = new Date(startOfToday);
     startOfYesterday.setDate(startOfYesterday.getDate() - 1);
 
-    // Today's sales
     const todaySales = await Item.aggregate([
       { $unwind: "$sales" },
       { $match: { "sales.date": { $gte: startOfToday } } },
@@ -26,29 +27,28 @@ exports.getTodaySales = async (req, res) => {
         $group: {
           _id: null,
           totalAmount: { $sum: "$sales.amount" },
-          totalCount: { $sum: 1 }
-        }
-      }
+          totalCount: { $sum: 1 },
+        },
+      },
     ]);
 
-    // Yesterday's sales (for comparison)
     const yesterdaySales = await Item.aggregate([
       { $unwind: "$sales" },
       {
         $match: {
           "sales.date": {
             $gte: startOfYesterday,
-            $lt: startOfToday
-          }
-        }
+            $lt: startOfToday,
+          },
+        },
       },
       {
         $group: {
           _id: null,
           totalAmount: { $sum: "$sales.amount" },
-          totalCount: { $sum: 1 }
-        }
-      }
+          totalCount: { $sum: 1 },
+        },
+      },
     ]);
 
     const today = todaySales[0] || { totalAmount: 0, totalCount: 0 };
@@ -72,6 +72,7 @@ exports.getTodaySales = async (req, res) => {
   }
 };
 
+// ✅ Get today's total sales (no comparison)
 exports.getTodayTotalSales = async (req, res) => {
   try {
     const startOfDay = new Date();
@@ -85,10 +86,45 @@ exports.getTodayTotalSales = async (req, res) => {
     res.json({
       totalAmount,
       totalCount,
-      percentAmountChange: 0, // You can implement this if you want
+      percentAmountChange: 0,
       percentCountChange: 0,
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch today's sales" });
+  }
+};
+
+// ✅ Get category sales over time (for chart)
+exports.getCategorySalesOverTime = async (req, res) => {
+  try {
+    const result = await Sale.aggregate([
+      {
+        $group: {
+          _id: {
+            categoryName: "$categoryName",
+            date: {
+              $dateToString: { format: "%Y-%m-%d", date: "$date" },
+            },
+          },
+          totalSold: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          categoryName: "$_id.categoryName",
+          date: "$_id.date",
+          totalSold: 1,
+        },
+      },
+      {
+        $sort: { date: 1 },
+      },
+    ]);
+
+    res.json(result);
+  } catch (err) {
+    console.error("Error fetching category sales over time:", err);
+    res.status(500).json({ message: "Failed to fetch category sales data." });
   }
 };
