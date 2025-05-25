@@ -15,7 +15,6 @@ import {
   Legend
 } from 'chart.js';
 
-// ✅ Register necessary components
 Chart.register(
   LineController,
   LineElement,
@@ -100,7 +99,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.fetchCategoryCount();
     this.fetchTodaySales();
     this.fetchRecentSales();
-    this.fetchCategorySalesOverTime(); // ✅ updated
+    this.fetchCategorySalesOverTime(); // ✅
   }
 
   async fetchItemCount() {
@@ -149,46 +148,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ New fetch for category sales over time
- async fetchCategorySalesOverTime() {
-  try {
-  const res = await fetch('http://localhost:5000/api/sales/categories/daily-sales', {
-  credentials: 'include',
-});
-    const rawData: {
-      categoryName: string;
-      date: string;
-      totalSold: number;
-    }[] = await res.json(); // 👈 explicitly type the response
+  async fetchCategorySalesOverTime() {
+    try {
+      const res = await fetch('http://localhost:5000/api/sales/categories/daily-sales', {
+        credentials: 'include',
+      });
+      const rawData: {
+        categoryName: string;
+        date: string;
+        totalSold: number;
+      }[] = await res.json();
 
-    const categoryMap: { [category: string]: { [date: string]: number } } = {};
-    rawData.forEach((entry) => {
-      if (!categoryMap[entry.categoryName]) {
-        categoryMap[entry.categoryName] = {};
-      }
-      categoryMap[entry.categoryName][entry.date] = entry.totalSold;
-    });
+      const categoryMap: { [category: string]: { [date: string]: number } } = {};
+      rawData.forEach((entry) => {
+        if (!categoryMap[entry.categoryName]) {
+          categoryMap[entry.categoryName] = {};
+        }
+        categoryMap[entry.categoryName][entry.date] = entry.totalSold;
+      });
 
-    const allDates = [...new Set(rawData.map((e) => e.date))].sort();
+      const allDates = [...new Set(rawData.map((e) => e.date))].sort();
 
-    this.categorySalesOverTime = {
-      labels: allDates,
-      datasets: Object.entries(categoryMap).map(([category, dateMap]) => ({
-        label: category,
-        data: allDates.map((date) => dateMap[date] || 0),
-        borderColor: this.getColorForCategory(category),
-        fill: false,
-        tension: 0.3,
-        pointBackgroundColor: this.getColorForCategory(category),
-        pointRadius: 4,
-      })),
-    };
+      this.categorySalesOverTime = {
+        labels: allDates,
+        datasets: Object.entries(categoryMap).map(([category, dateMap]) => ({
+          label: category,
+          data: allDates.map((date) => dateMap[date] || 0),
+          borderColor: this.getColorForCategory(category),
+          fill: false,
+          tension: 0.3,
+          pointBackgroundColor: this.getColorForCategory(category),
+          pointRadius: 4,
+        })),
+      };
 
-    this.renderChart();
-  } catch (error) {
-    console.error('Error fetching category sales over time:', error);
+      this.renderChart();
+    } catch (error) {
+      console.error('Error fetching category sales over time:', error);
+    }
   }
-}
 
   getColorForCategory(category: string): string {
     const colors: { [key: string]: string } = {

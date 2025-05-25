@@ -1,5 +1,6 @@
 const Item = require("../models/itemModel");
 const Sale = require("../models/salesModel"); // ✅ Already imported
+const Category = require("../models/categoryModel");
 
 exports.create = async (req, res) => {
   const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
@@ -80,19 +81,30 @@ exports.sell = async (req, res) => {
 exports.sellItem = async (req, res) => {
   try {
     const item = await Item.findById(req.params.id).populate('categoryId');
-    if (!item || item.quantity <= 0)
-      return res.status(400).json({ message: 'Out of stock' });
+
+    if (!item || item.quantity <= 0) {
+      return res.status(400).json({ message: "Out of stock or item not found" });
+    }
+
+    // Get category name manually in case populate fails
+    let categoryName = '';
+    if (item.categoryId && item.categoryId.name) {
+      categoryName = item.categoryId.name;
+    } else {
+      // fallback: fetch category manually
+      const category = await Category.findById(item.categoryId);
+      if (category) categoryName = category.name;
+    }
 
     item.quantity -= 1;
     await item.save();
 
-    // ✅ Record sale in separate `sales` collection
     const sale = new Sale({
       itemName: item.name,
-      categoryId: item.categoryId._id,
-      categoryName: item.categoryId.name,
+      categoryId: item.categoryId._id || item.categoryId,
+      categoryName: categoryName,
       amount: item.price,
-      date: new Date(),
+      date: new Date()
     });
 
     await sale.save();
